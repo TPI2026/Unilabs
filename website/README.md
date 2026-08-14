@@ -8,8 +8,8 @@ Static demo website for the Unilabs / Talkdesk appointment showcase.
 - Patient registry and patient details
 - Scheduling simulations for Amsterdam, Utrecht and Enschede
 
-## Run locally
-Open `index.html` in a browser.
+## Demo scenario
+Patient A holds the 10:00 Amsterdam appointment. Patient B holds 11:00 and remains on the waitlist for 10:00.
 
 ## Vercel
-Deploy this `website` directory as the Vercel project root. The current version is a frontend prototype and uses fictional demo data only.
+Deploy the `website` directory as the Vercel project root. No build step is required. All patient data is fictional demo data.
