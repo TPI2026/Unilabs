@@ -120,4 +120,4 @@ Failures return:
 ```
 
 ## Vercel
-Deploy the `website` directory as the Vercel project root. No frontend build step is required. Functions are configured to run in `fra1`. All patient data is fictional demo data.
+Deploy the `website` directory as the Vercel project root. No frontend build step is required. Functions are configured to run in `fra1`. Production deployments are triggered from `main` through the connected Vercel project. All patient data is fictional demo data.
