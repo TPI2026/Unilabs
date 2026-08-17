@@ -73,23 +73,30 @@ function validateField(name, value) {
 
 async function callSupabaseRpc(rpcName, params) {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseServerKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl || !supabaseServerKey) {
     const error = new Error('Supabase server credentials are not configured');
     error.statusCode = 500;
     error.code = 'server_configuration_error';
     throw error;
   }
 
+  const headers = {
+    apikey: supabaseServerKey,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  // New sb_secret_* keys are not JWTs and must not be sent as Bearer tokens.
+  // Legacy service_role JWTs still require Authorization for backward compatibility.
+  if (!supabaseServerKey.startsWith('sb_secret_')) {
+    headers.Authorization = `Bearer ${supabaseServerKey}`;
+  }
+
   const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/${rpcName}`, {
     method: 'POST',
-    headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    headers,
     body: JSON.stringify(params),
   });
 
