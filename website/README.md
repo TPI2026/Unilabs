@@ -23,8 +23,10 @@ Every endpoint requires the `x-api-key` header. Do not call these endpoints dire
 ## Required Vercel environment variables
 
 - `SUPABASE_URL` - `https://mshxmttxwfkvexchwjkr.supabase.co`
-- `SUPABASE_SERVICE_ROLE_KEY` - secret Supabase server key; never expose it client-side
+- `SUPABASE_SECRET_KEY` - recommended `sb_secret_...` Supabase server key; never expose it client-side
 - `UNILABS_API_KEY` - shared secret sent by the Talkdesk Custom Connection as `x-api-key`
+
+The API helper also accepts the legacy `SUPABASE_SERVICE_ROLE_KEY` for backward compatibility, but new deployments should use `SUPABASE_SECRET_KEY`.
 
 Use `.env.example` only as a variable-name template. Never commit real secret values.
 
