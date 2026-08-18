@@ -1,0 +1,38 @@
+{
+  "project": "Unilabs AI Appointment Demo",
+  "supabase_project_id": "mshxmttxwfkvexchwjkr",
+  "validated_on": "2026-08-18",
+  "applied_migrations": [
+    {
+      "version": "20260818081423",
+      "name": "appointment_platform_hardening",
+      "statement_count": 116
+    },
+    {
+      "version": "20260818081433",
+      "name": "demo_scenario_automation",
+      "statement_count": 11
+    }
+  ],
+  "rollback_validation": "passed",
+  "post_apply_tests": {
+    "central_story": "passed",
+    "unhappy_paths": "passed",
+    "decline_and_expiry": "passed",
+    "consistency": "passed"
+  },
+  "live_baseline": {
+    "scenario_date": "2026-08-19",
+    "generated_days": 7,
+    "offer_hold_minutes": 5,
+    "slot_count": 189,
+    "appointment_count": 11,
+    "waitlist_count": 1,
+    "verified_chat_voice_identity_count": 10
+  },
+  "cron": {
+    "job_name": "unilabs-expire-waitlist-offers",
+    "schedule": "* * * * *",
+    "verified_successfully_running": true
+  }
+}
