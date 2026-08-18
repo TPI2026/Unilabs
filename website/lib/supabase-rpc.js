@@ -170,20 +170,24 @@ async function callSupabaseRpc(rpcName, params) {
 function createRpcHandler({ action, rpcName, required = [], optional = [], map, validate }) {
   return async function handler(request, response) {
     const traceId = correlationId(request);
+    let requestId = traceId;
 
     if (request.method !== 'POST') {
       response.setHeader('Allow', 'POST');
       return sendJson(response, 405, {
         ok: false,
         action,
-        request_id: traceId,
+        request_id: requestId,
         error: { code: 'method_not_allowed', message: 'Use POST', retryable: false },
-      }, traceId);
+      }, requestId);
     }
 
     try {
       requireApiKey(request);
       const body = parseBody(request);
+      if (typeof body.request_id === 'string' && body.request_id.trim() !== '') {
+        requestId = body.request_id.trim();
+      }
 
       for (const field of required) {
         if (body[field] == null || body[field] === '') {
@@ -199,7 +203,7 @@ function createRpcHandler({ action, rpcName, required = [], optional = [], map, 
 
       const params = map(body);
       const data = await callSupabaseRpc(rpcName, params);
-      const requestId = data?.request_id || body.request_id || traceId;
+      requestId = data?.request_id || requestId;
 
       return sendJson(response, 200, {
         ok: true,
@@ -208,7 +212,6 @@ function createRpcHandler({ action, rpcName, required = [], optional = [], map, 
         data,
       }, requestId);
     } catch (error) {
-      const requestId = error?.requestId || traceId;
       return sendJson(response, error.statusCode || 500, {
         ok: false,
         action,
