@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   deploy:
+    # Pages is enabled in repository settings with GitHub Actions as the source.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
