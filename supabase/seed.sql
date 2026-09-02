@@ -46,9 +46,10 @@ insert into public.patients(
 values
   ('PAT-1001', 'Emma', 'de Jong', 'emma.dejong@example.com', 'DEMO-NL-1001', 'Stadhuisbrug', '1', null, '3511 KP', 'Utrecht', 'Netherlands', 'central_story_patient_a'),
   ('PAT-1002', 'Sophie', 'van Dijk', 'sophie.vandijk@example.com', 'DEMO-NL-1002', 'Neude', '11', null, '3512 AE', 'Utrecht', 'Netherlands', 'central_story_patient_b'),
-  ('PAT-1003', 'Liam', 'de Vries', 'liam.devries@example.com', '+4917646752711', 'Coolsingel', '40', null, '3011 AD', 'Rotterdam', 'Netherlands', 'happy_path_patient'),
+  ('PAT-1003', 'Liam', 'de Vries', 'liam.devries@example.com', 'DEMO-NL-1003', 'Coolsingel', '40', null, '3011 AD', 'Rotterdam', 'Netherlands', 'background_capacity'),
   ('PAT-1004', 'Noor', 'Bakker', 'noor.bakker@example.com', 'DEMO-NL-1004', 'Amstel', '1', null, '1011 PN', 'Amsterdam', 'Netherlands', 'existing_appointment_patient'),
   ('PAT-1005', 'Daan', 'Meijer', 'daan.meijer@example.com', 'DEMO-NL-1005', 'Hoogstraat', '110', null, '3011 PV', 'Rotterdam', 'Netherlands', 'existing_waitlist_patient'),
+  ('PAT-1006', 'Max', 'Mustermann', 'max.mustermann.demo@example.com', '+4917646752711', 'Musterstraße', '12', null, '10115', 'Berlin', 'Germany', 'happy_path_patient'),
   ('PAT-BG-U10-01', 'Bram', 'Smit', 'bg.u10.01@example.com', 'DEMO-BG-U10-01', null, null, null, null, null, 'Netherlands', 'background_capacity'),
   ('PAT-BG-U10-02', 'Eva', 'de Boer', 'bg.u10.02@example.com', 'DEMO-BG-U10-02', null, null, null, null, null, 'Netherlands', 'background_capacity'),
   ('PAT-BG-U10-03', 'Lars', 'Visser', 'bg.u10.03@example.com', 'DEMO-BG-U10-03', null, null, null, null, null, 'Netherlands', 'background_capacity'),
