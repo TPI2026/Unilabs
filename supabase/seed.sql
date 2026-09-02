@@ -5,7 +5,6 @@
 insert into public.locations(location_id, city, timezone)
 values
   ('LOC-AMS', 'Amsterdam', 'Europe/Amsterdam'),
-  ('LOC-RTM', 'Rotterdam', 'Europe/Amsterdam'),
   ('LOC-UTR', 'Utrecht', 'Europe/Amsterdam'),
   ('LOC-ENS', 'Enschede', 'Europe/Amsterdam')
 on conflict (location_id) do update
@@ -19,11 +18,6 @@ values
   ('ROOM-AMS-03-KEIZERSGRACHT', 'LOC-AMS', 'Keizersgracht', 3),
   ('ROOM-AMS-04-PRINSENGRACHT', 'LOC-AMS', 'Prinsengracht', 4),
   ('ROOM-AMS-05-WETERINGSCHANS', 'LOC-AMS', 'Weteringschans', 5),
-  ('ROOM-RTM-01-COOLSINGEL', 'LOC-RTM', 'Coolsingel', 1),
-  ('ROOM-RTM-02-WESTBLAAK', 'LOC-RTM', 'Westblaak', 2),
-  ('ROOM-RTM-03-WITTE-DE-WITHSTRAAT', 'LOC-RTM', 'Witte de Withstraat', 3),
-  ('ROOM-RTM-04-MEENT', 'LOC-RTM', 'Meent', 4),
-  ('ROOM-RTM-05-SCHIEDAMSE-VEST', 'LOC-RTM', 'Schiedamse Vest', 5),
   ('ROOM-UTR-01-OUDEGRACHT', 'LOC-UTR', 'Oudegracht', 1),
   ('ROOM-UTR-02-NEUDE', 'LOC-UTR', 'Neude', 2),
   ('ROOM-UTR-03-BILTSTRAAT', 'LOC-UTR', 'Biltstraat', 3),
@@ -46,9 +40,9 @@ insert into public.patients(
 values
   ('PAT-1001', 'Emma', 'de Jong', 'emma.dejong@example.com', 'DEMO-NL-1001', 'Stadhuisbrug', '1', null, '3511 KP', 'Utrecht', 'Netherlands', 'central_story_patient_a'),
   ('PAT-1002', 'Sophie', 'van Dijk', 'sophie.vandijk@example.com', 'DEMO-NL-1002', 'Neude', '11', null, '3512 AE', 'Utrecht', 'Netherlands', 'central_story_patient_b'),
-  ('PAT-1003', 'Liam', 'de Vries', 'liam.devries@example.com', 'DEMO-NL-1003', 'Coolsingel', '40', null, '3011 AD', 'Rotterdam', 'Netherlands', 'background_capacity'),
+  ('PAT-1003', 'Liam', 'de Vries', 'liam.devries@example.com', 'DEMO-NL-1003', 'Langestraat', '40', null, '7511 HC', 'Enschede', 'Netherlands', 'background_capacity'),
   ('PAT-1004', 'Noor', 'Bakker', 'noor.bakker@example.com', 'DEMO-NL-1004', 'Amstel', '1', null, '1011 PN', 'Amsterdam', 'Netherlands', 'existing_appointment_patient'),
-  ('PAT-1005', 'Daan', 'Meijer', 'daan.meijer@example.com', 'DEMO-NL-1005', 'Hoogstraat', '110', null, '3011 PV', 'Rotterdam', 'Netherlands', 'existing_waitlist_patient'),
+  ('PAT-1005', 'Daan', 'Meijer', 'daan.meijer@example.com', 'DEMO-NL-1005', 'Hengelosestraat', '110', null, '7514 AJ', 'Enschede', 'Netherlands', 'existing_waitlist_patient'),
   ('PAT-1006', 'Max', 'Mustermann', 'max.mustermann.demo@example.com', '+4917646752711', 'Musterstraße', '12', null, '10115', 'Berlin', 'Germany', 'happy_path_patient'),
   ('PAT-BG-U10-01', 'Bram', 'Smit', 'bg.u10.01@example.com', 'DEMO-BG-U10-01', null, null, null, null, null, 'Netherlands', 'background_capacity'),
   ('PAT-BG-U10-02', 'Eva', 'de Boer', 'bg.u10.02@example.com', 'DEMO-BG-U10-02', null, null, null, null, null, 'Netherlands', 'background_capacity'),
