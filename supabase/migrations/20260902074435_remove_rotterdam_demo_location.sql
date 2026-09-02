@@ -1,0 +1,111 @@
+update public.patients set street='Langestraat', house_number='40', postcode='7511 HC', city='Enschede' where patient_id='PAT-1003';
+update public.patients set street='Hengelosestraat', house_number='110', postcode='7514 AJ', city='Enschede' where patient_id='PAT-1005';
+
+with mapped as (
+  select a.appointment_id,
+         ens_slot.slot_id as new_slot_id,
+         ens_room.room_id as new_room_id
+  from public.appointments a
+  join public.appointment_slots old_slot on old_slot.slot_id=a.slot_id and old_slot.location_id=a.location_id
+  join public.rooms old_room on old_room.room_id=a.room_id and old_room.location_id=a.location_id
+  join public.appointment_slots ens_slot on ens_slot.location_id='LOC-ENS' and ens_slot.slot_date=old_slot.slot_date and ens_slot.start_time=old_slot.start_time
+  join public.rooms ens_room on ens_room.location_id='LOC-ENS' and ens_room.room_order=old_room.room_order
+  where a.location_id='LOC-RTM'
+)
+update public.appointments a
+set location_id='LOC-ENS', slot_id=m.new_slot_id, room_id=m.new_room_id, updated_at=now()
+from mapped m
+where a.appointment_id=m.appointment_id;
+
+delete from public.events where details->>'location_id'='LOC-RTM' or details->>'location'='Rotterdam';
+delete from public.appointment_slots where location_id='LOC-RTM';
+delete from public.rooms where location_id='LOC-RTM';
+delete from public.locations where location_id='LOC-RTM';
+
+create or replace function public.reset_demo_scenario(
+  p_scenario_date date default ((now() at time zone 'Europe/Amsterdam')::date + 1),
+  p_generated_days integer default 7,
+  p_offer_hold_minutes integer default 5
+)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_slots integer;
+  v_appointments integer;
+  v_waitlists integer;
+  v_now timestamptz:=now();
+begin
+  if p_scenario_date is null then raise exception using errcode='22023',message='scenario_date is required'; end if;
+  if p_generated_days<1 or p_generated_days>31 then raise exception using errcode='22023',message='generated_days must be between 1 and 31'; end if;
+  if p_offer_hold_minutes<1 or p_offer_hold_minutes>60 then raise exception using errcode='22023',message='offer_hold_minutes must be between 1 and 60'; end if;
+  perform pg_advisory_xact_lock(hashtext('unilabs_reset_demo_scenario'));
+  if (select count(*) from public.locations where location_id in ('LOC-AMS','LOC-UTR','LOC-ENS'))<>3 then
+    raise exception using errcode='P0002',message='Required demo locations are missing';
+  end if;
+  if (select count(*) from public.patients where patient_id in (
+      'PAT-1001','PAT-1002','PAT-1003','PAT-1004','PAT-1005',
+      'PAT-BG-U10-01','PAT-BG-U10-02','PAT-BG-U10-03','PAT-BG-U10-04',
+      'PAT-BG-R15-01','PAT-BG-R15-02','PAT-BG-R15-03','PAT-BG-R15-04','PAT-BG-R15-05'))<>14 then
+    raise exception using errcode='P0002',message='Required demo patients are missing';
+  end if;
+  if exists (select 1 from public.locations l left join public.rooms r on r.location_id=l.location_id
+      where l.location_id in ('LOC-AMS','LOC-UTR','LOC-ENS') group by l.location_id having count(r.room_id)<>5) then
+    raise exception using errcode='P0001',message='Each demo location must have exactly five rooms';
+  end if;
+  delete from public.events;
+  delete from public.notifications;
+  delete from public.waitlist_entries;
+  delete from public.action_requests;
+  delete from public.appointments;
+  delete from public.appointment_slots;
+  delete from public.demo_scenarios;
+  insert into public.demo_scenarios(scenario_key,scenario_date,generated_days,offer_hold_minutes,reset_at)
+  values ('default',p_scenario_date,p_generated_days,p_offer_hold_minutes,v_now);
+  insert into public.appointment_slots(slot_id,location_id,slot_date,start_time,bookable,created_at)
+  select 'SLOT-'||replace(l.location_id,'LOC-','')||'-D'||d.day_offset::text||'-'||to_char(t.start_time,'HH24MI'),
+    l.location_id,p_scenario_date+d.day_offset,t.start_time,(t.start_time<>time '12:00'),v_now
+  from public.locations l cross join generate_series(0,p_generated_days-1) as d(day_offset)
+  cross join (values (time '09:00'),(time '10:00'),(time '11:00'),(time '12:00'),(time '13:00'),(time '14:00'),(time '15:00'),(time '16:00'),(time '17:00')) as t(start_time)
+  where l.location_id in ('LOC-AMS','LOC-UTR','LOC-ENS');
+  get diagnostics v_slots=row_count;
+  insert into public.appointments(appointment_id,patient_id,booking_reference,location_id,slot_id,room_id,status,created_at,updated_at)
+  select seed.appointment_id,seed.patient_id,seed.booking_reference,seed.location_id,s.slot_id,r.room_id,'confirmed',v_now,v_now
+  from (values
+      ('APT-BG-U10-01'::text,'PAT-BG-U10-01'::text,'UNI-100001'::text,'LOC-UTR'::text,time '10:00',1::smallint),
+      ('APT-BG-U10-02','PAT-BG-U10-02','UNI-100002','LOC-UTR',time '10:00',2::smallint),
+      ('APT-BG-U10-03','PAT-BG-U10-03','UNI-100003','LOC-UTR',time '10:00',3::smallint),
+      ('APT-BG-U10-04','PAT-BG-U10-04','UNI-100004','LOC-UTR',time '10:00',4::smallint),
+      ('APT-BG-R15-01','PAT-BG-R15-01','UNI-100005','LOC-ENS',time '15:00',1::smallint),
+      ('APT-BG-R15-02','PAT-BG-R15-02','UNI-100006','LOC-ENS',time '15:00',2::smallint),
+      ('APT-BG-R15-03','PAT-BG-R15-03','UNI-100007','LOC-ENS',time '15:00',3::smallint),
+      ('APT-BG-R15-04','PAT-BG-R15-04','UNI-100008','LOC-ENS',time '15:00',4::smallint),
+      ('APT-BG-R15-05','PAT-BG-R15-05','UNI-100009','LOC-ENS',time '15:00',5::smallint),
+      ('APT-C-1004','PAT-1004','UNI-100010','LOC-AMS',time '13:00',1::smallint),
+      ('APT-E-1005','PAT-1005','UNI-100011','LOC-ENS',time '16:00',1::smallint)
+  ) as seed(appointment_id,patient_id,booking_reference,location_id,start_time,room_order)
+  join public.appointment_slots s on s.location_id=seed.location_id and s.slot_date=p_scenario_date and s.start_time=seed.start_time
+  join public.rooms r on r.location_id=seed.location_id and r.room_order=seed.room_order;
+  get diagnostics v_appointments=row_count;
+  insert into public.waitlist_entries(waitlist_entry_id,patient_id,location_id,requested_slot_id,current_appointment_id,status,created_at)
+  select 'WL-E-1005','PAT-1005','LOC-ENS',s.slot_id,'APT-E-1005','waiting',v_now
+  from public.appointment_slots s where s.location_id='LOC-ENS' and s.slot_date=p_scenario_date and s.start_time=time '15:00';
+  get diagnostics v_waitlists=row_count;
+  perform setval('public.unilabs_booking_reference_seq',100011,true);
+  perform setval('public.unilabs_appointment_id_seq',200000,true);
+  perform setval('public.unilabs_waitlist_id_seq',200000,true);
+  perform setval('public.unilabs_notification_id_seq',200000,true);
+  perform setval('public.unilabs_event_id_seq',200000,true);
+  insert into public.events(event_id,event_type,event_at,channel,details)
+  values ('EVT-LIVE-'||nextval('public.unilabs_event_id_seq'),'demo_reset',v_now,'system',
+    jsonb_build_object('scenario_date',p_scenario_date,'generated_days',p_generated_days,'offer_hold_minutes',p_offer_hold_minutes,
+      'slot_count',v_slots,'appointment_count',v_appointments,'waitlist_count',v_waitlists));
+  if v_slots<>27*p_generated_days then raise exception using errcode='P0001',message='Unexpected slot count after reset'; end if;
+  if v_appointments<>11 then raise exception using errcode='P0001',message='Unexpected baseline appointment count after reset'; end if;
+  if v_waitlists<>1 then raise exception using errcode='P0001',message='Unexpected baseline waitlist count after reset'; end if;
+  return jsonb_build_object('scenario_key','default','scenario_date',p_scenario_date,'generated_days',p_generated_days,
+    'offer_hold_minutes',p_offer_hold_minutes,'slot_count',v_slots,'appointment_count',v_appointments,'waitlist_count',v_waitlists,'reset_at',v_now);
+end;
+$$;
