@@ -6,7 +6,8 @@ insert into public.locations(location_id, city, timezone)
 values
   ('LOC-AMS', 'Amsterdam', 'Europe/Amsterdam'),
   ('LOC-RTM', 'Rotterdam', 'Europe/Amsterdam'),
-  ('LOC-UTR', 'Utrecht', 'Europe/Amsterdam')
+  ('LOC-UTR', 'Utrecht', 'Europe/Amsterdam'),
+  ('LOC-ENS', 'Enschede', 'Europe/Amsterdam')
 on conflict (location_id) do update
 set city = excluded.city,
     timezone = excluded.timezone;
@@ -27,7 +28,12 @@ values
   ('ROOM-UTR-02-NEUDE', 'LOC-UTR', 'Neude', 2),
   ('ROOM-UTR-03-BILTSTRAAT', 'LOC-UTR', 'Biltstraat', 3),
   ('ROOM-UTR-04-MALIEBAAN', 'LOC-UTR', 'Maliebaan', 4),
-  ('ROOM-UTR-05-CROESELAAN', 'LOC-UTR', 'Croeselaan', 5)
+  ('ROOM-UTR-05-CROESELAAN', 'LOC-UTR', 'Croeselaan', 5),
+  ('ROOM-ENS-01-LANGESTRAAT', 'LOC-ENS', 'Langestraat', 1),
+  ('ROOM-ENS-02-DEURNINGERSTRAAT', 'LOC-ENS', 'Deurningerstraat', 2),
+  ('ROOM-ENS-03-HENGELOSESTRAAT', 'LOC-ENS', 'Hengelosestraat', 3),
+  ('ROOM-ENS-04-KUIPERSDIJK', 'LOC-ENS', 'Kuipersdijk', 4),
+  ('ROOM-ENS-05-OLDENZAALSESTRAAT', 'LOC-ENS', 'Oldenzaalsestraat', 5)
 on conflict (room_id) do update
 set location_id = excluded.location_id,
     room_name = excluded.room_name,
